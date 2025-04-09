@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Page</title>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Slider Table</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    table {
+      width: 80%;
+      margin: 2rem auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 1rem;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    .percentage {
+      font-weight: bold;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .save-button, .view-button, .edit-button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .save-button {
+      background-color:#1fd655;
+      color: white;
+    }
+    .save-button:active {
+      box-shadow: inset 0 0 10px darkgreen;
+      transform: scale(0.95);
+    }
+   
+    .edit-button {
+      background-color: #f39c12;
+      color: white;
+    }
+    #header-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+    #current-date-box {
+      padding: 0.5rem 1rem;
+      border: 4px double #333;
+      font-weight: bold;
+      font-size: 1rem;
+      border-radius: 10px;
+      background: rgb(255, 253, 208)
+    }
+   #average-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 9px double #00ab41;
+    }
+  </style>
+</head>
+<body>
+  <div id="header-box">
+    <div id="current-date-box"></div>
+    <div id="average-circle">0%</div>
+  </div>  <h2 style="text-align:center;">Task Progress Table</h2>  <table>
+    <thead>
+      <tr>
+        <th>Task Name</th>
+        <th>Progress</th>
+        <th>Saved %</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="ssc-math">ssc-math</td>
+        <td><input type="range" class="custom-slider" min="0" max="100" value="50" oninput="updateValue(this)"></td>
+        <td class="percentage">50%</td>
+      </tr>
+      <tr>
+        <td>ssc-reasoning</td>
+        <td><input type="range" class="custom-slider" min="0" max="100" value="30" oninput="updateValue(this)"></td>
+        <td class="percentage">30%</td>
+      </tr>
+       <tr>
+        <td>notes</td>
+        <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
+        <td class="percentage">0%</td>
+      </tr>
+      <tr>
+        <td>sem-3</td>
+        <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
+        <td class="percentage">0%</td>
+      </tr>
+      <tr>
+        <td>html/css</td>
+        <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
+        <td class="percentage">0%</td>
+      </tr>
+      <tr>
+        <td>8pm-9pm</td>
+        <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
+        <td class="percentage">0%</td>
+      </tr>    
+    </tbody>
+  </table>  <div class="button-container">
+    <button class="save-button" onclick="saveData()">Save</button>
+    <button class="edit-button" onclick="editData()">Edit</button>
+    <button class="view-button" onclick="window.location.href='view-saved.html'">View Saved</button>
+     </div> 
+   
+<div>
+    <button class="notes-button" onclick="window.location.href='notes.html'">Notes+</button>
+    
+    <button class="calendar-button"
+onclick="window.location.href='calendar.html'  ">calendar</button>
+
+</div>
+  
+  
+  <script>
+  const weights = [1, 1.5,1.5,2, 1.5, 1]; 
+    function updateValue(slider) {
+      const percentCell = slider.parentElement.nextElementSibling;
+      percentCell.textContent = slider.value + '%';
+      updateAverageCircle();
+    }
+function updateAverageCircle() {
+      const sliders = document.querySelectorAll('input[type=range]');
+      let weightedSum = 0;
+      let totalWeight = 0;
+      sliders.forEach((slider, i) => {
+        const value = parseInt(slider.value);
+        weightedSum += value * weights[i];
+        totalWeight += weights[i];
+      });
+      const average = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+      const circle = document.getElementById('average-circle');
+      circle.textContent = average + '%';
+    }
+  /*  function updateAverageCircle() {
+      const sliders = document.querySelectorAll('input[type=range]');
+      let total = 0;
+      sliders.forEach(slider => {
+        total += parseInt(slider.value);
+      });
+      const average = sliders.length > 0 ? Math.round(total / sliders.length) : 0;
+      const circle = document.getElementById('average-circle');
+      circle.textContent = average + '%';
+    }   */
+
+    function saveData() {
+      const date = new Date().toISOString().split('T')[0];
+      const rows = document.querySelectorAll("tbody tr");
+      const saveObject = { date: date, tasks: [] };
+      rows.forEach(row => {
+        const taskName = row.children[0].textContent;
+        const slider = row.querySelector("input[type=range]");
+        const value = slider.value;
+        saveObject.tasks.push({ task: taskName, value: value });
+        slider.disabled = true;
+      });
+      localStorage.setItem(`taskData_${date}`, JSON.stringify(saveObject));
+      alert("Saved successfully!");
+    }
+
+    function editData() {
+      const sliders = document.querySelectorAll('input[type=range]');
+      sliders.forEach(slider => slider.disabled = false);
+    }
+
+    function viewSaved() {
+      const dateInput = document.createElement('input');
+      dateInput.type = 'date';
+      dateInput.style.display = 'block';
+      dateInput.style.margin = '1rem auto';
+      dateInput.onchange = () => {
+        const date = dateInput.value;
+        const data = localStorage.getItem(`taskData_${date}`);
+        if (!data) {
+          alert("No data found for selected date.");
+          return;
+        }
+        const parsed = JSON.parse(data);
+        let message = `Date: ${date.split('-').reverse().join('-')}\n`;
+        let total = 0;
+        parsed.tasks.forEach(task => {
+          message += ` - ${task.task}: ${task.value}%\n`;
+          total += parseInt(task.value);
+        });
+        const avg = Math.round(total / parsed.tasks.length);
+        message += `\nAverage: ${avg}%`;
+        alert(message);
+        dateInput.remove();
+      };
+      document.body.appendChild(dateInput);
+      dateInput.click();
+    }
+
+    function loadSavedDataForToday() {
+      const today = new Date().toISOString().split('T')[0];
+      const data = localStorage.getItem(`taskData_${today}`);
+      if (!data) return;
+      const parsed = JSON.parse(data);
+      const rows = document.querySelectorAll("tbody tr");
+      parsed.tasks.forEach(taskData => {
+        rows.forEach(row => {
+          const taskName = row.children[0].textContent;
+          if (taskName === taskData.task) {
+            const slider = row.querySelector("input[type=range]");
+            slider.value = taskData.value;
+            slider.disabled = true;
+            updateValue(slider);
+          }
+        });
+      });
+    }
+
+    function displayCurrentDate() {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+      const formatted = `${day}-${month}-${year}`;
+      const dateBox = document.getElementById('current-date-box');
+      dateBox.textContent = formatted;
+    }
+
+    window.onload = function() {
+      displayCurrentDate();
+      loadSavedDataForToday();
+      updateAverageCircle();
+    }
+  
+  </script></body>
+</html>

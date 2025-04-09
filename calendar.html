@@ -1,0 +1,97 @@
+<!DOCTYPE html><html>
+<head>
+  <title>Task Calendar</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 2rem; }
+    table { margin: auto; border-collapse: collapse; }
+    th, td {
+      width: 80px; height: 60px;
+      border: 1px solid #ccc;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: bold;
+      background-color: #f0f0f0;
+      color: #000;
+    }
+    #month-select, #year-select {
+      margin: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Monthly Task Overview</h2>
+  <select id="month-select"></select>
+  <select id="year-select"></select>
+  <div id="calendar"></div>  <script>
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+    const calendarDiv = document.getElementById('calendar');
+
+    for (let m = 0; m < 12; m++) {
+      const option = document.createElement('option');
+      option.value = m;
+      option.textContent = new Date(2000, m).toLocaleString('default', { month: 'long' });
+      monthSelect.appendChild(option);
+    }
+
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+      const option = document.createElement('option');
+      option.value = y;
+      option.textContent = y;
+      yearSelect.appendChild(option);
+    }
+
+    monthSelect.value = new Date().getMonth();
+    yearSelect.value = currentYear;
+
+    function getColor(percent) {
+      const green = Math.floor((percent / 100) * 200);
+      const red = 200 - green;
+      return `rgb(${red}, ${green}, 0)`;
+    }
+
+    function buildCalendar(month, year) {
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let table = '<table><tr>';
+      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      weekdays.forEach(day => table += `<th>${day}</th>`);
+      table += '</tr><tr>';
+
+      for (let i = 0; i < firstDay; i++) table += '<td></td>';
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const data = localStorage.getItem(`taskData_${dateKey}`);
+        let bgColor = '#f0f0f0';
+        let content = `${day}`;
+
+        if (data) {
+          try {
+            const parsed = JSON.parse(data);
+            let total = 0;
+            parsed.tasks.forEach(t => total += parseInt(t.value));
+            const avg = Math.round(total / parsed.tasks.length);
+            bgColor = getColor(avg);
+            content = `${day}<br><small>${avg}%</small>`;
+          } catch (e) {}
+        }
+
+        table += `<td style="background-color:${bgColor}">${content}</td>`;
+        if ((firstDay + day) % 7 === 0) table += '</tr><tr>';
+      }
+
+      table += '</tr></table>';
+      calendarDiv.innerHTML = table;
+    }
+
+    monthSelect.onchange = () => buildCalendar(parseInt(monthSelect.value), parseInt(yearSelect.value));
+    yearSelect.onchange = () => buildCalendar(parseInt(monthSelect.value), parseInt(yearSelect.value));
+
+    buildCalendar(parseInt(monthSelect.value), parseInt(yearSelect.value));
+  </script></body>
+</html>

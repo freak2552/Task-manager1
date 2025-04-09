@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Task History</title>
+  <style>
+    body {
+      font-family: Georgia, serif;
+      background-color: #fffaf0;
+      padding: 2rem;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+    select {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .entry {
+      background-color: #f5f5dc;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      margin: 1rem auto;
+      padding: 1rem;
+      width: 80%;
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+                  rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+                  rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    }
+    .entry h3 {
+      margin-top: 0;
+    }
+    .task-item {
+      margin-left: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Saved Task Entries</h1>  <div class="controls">
+    <label for="sort">Sort by:</label>
+    <select id="sort" onchange="renderData()">
+      <option value="recent">Most Recent</option>
+      <option value="highest">Highest Avg %</option>
+      <option value="lowest">Lowest Avg %</option>
+    </select>
+  </div>  <div id="entries"></div>  <script>
+    const entriesDiv = document.getElementById("entries");
+    const sortSelect = document.getElementById("sort");
+
+    let dataList = [];
+
+    function loadAllSavedData() {
+      dataList = [];
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key) && key.startsWith("taskData_")) {
+          try {
+            const entry = JSON.parse(localStorage.getItem(key));
+            const total = entry.tasks.reduce((sum, t) => sum + parseInt(t.value), 0);
+            const avg = Math.round(total / entry.tasks.length);
+            dataList.push({ ...entry, avg });
+          } catch (e) {
+            console.error("Error parsing:", key);
+          }
+        }
+      }
+    }
+
+    function renderData() {
+      const sort = sortSelect.value;
+      let sorted = [...dataList];
+
+      if (sort === "highest") {
+        sorted.sort((a, b) => b.avg - a.avg);
+      } else if (sort === "lowest") {
+        sorted.sort((a, b) => a.avg - b.avg);
+      } else {
+        sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+      }
+
+      entriesDiv.innerHTML = "";
+      sorted.forEach(entry => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <h3>Date: ${entry.date.split('-').reverse().join('-')} (Avg: ${entry.avg}%)</h3>
+          <ul>
+            ${entry.tasks.map(t => `<li class="task-item">${t.task}: ${t.value}%</li>`).join('')}
+          </ul>
+        `;
+        entriesDiv.appendChild(div);
+      });
+    }
+
+    loadAllSavedData();
+    renderData();
+  </script></body>
+</html>
