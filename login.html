@@ -77,7 +77,7 @@
       const password = document.getElementById('password').value;
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = 'update2.html';
+        window.location.href = 'update.html';
       } catch (error) {
         document.getElementById('message').textContent = error.message;
       }
