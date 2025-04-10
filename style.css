@@ -1,0 +1,33 @@
+ .view-button {
+      background-color: #007bff;
+      color: white;
+    }
+.notes-button {
+  background-color:#eddb11;
+  color: white;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.notes-button:active {
+  box-shadow: inset 0 0 10px #d35400;
+  transform: scale(0.95);
+}
+ 
+.calendar-button {
+    background-color: #8B0000; /* Dark Red */
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .calendar-button:active {
+    box-shadow: inset 0 0 10px #4d0000;
+    transform: scale(0.95);
+  }
