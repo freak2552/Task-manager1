@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <title>Notes</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: grey;
+      font-family: 'Poppins', Arial,     sans-serif;
+      
+  overflow-x: hidden;
+    }h1 {
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
+  padding: 15px;
+  background-color: black;
+  margin: 0;
+}
+
+.inputContainer {
+  position: sticky;
+  top: 0;
+  display: flex;
+  gap: 10px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  z-index: 10;
+  border-bottom: 1px solid #ccc;
+}
+
+#noteInput {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  resize: none;
+  max-height: 150px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+#saveButton {
+  padding: 10px 16px;
+  font-size: 16px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.notesContainer {
+  padding: 10px;
+}
+
+.noteBubble {
+  position: relative;
+  border: 2px solid black;
+  margin: 10px 20px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: black;
+  font-weight: bold;  
+  background-size: 100% 24px;
+  background-position-y: 14px;
+  background-repeat: repeat-y;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 90%;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+  #confirmPopup {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border: 2px solid #045b8a;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 100;
+      display: none;
+    }
+
+    #confirmPopup button {
+      margin: 10px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #confirmPopup .yes {
+      background: #4CAF50;
+      color: white;
+    }
+
+    #confirmPopup .no {
+      background: #F44336;
+      color: black;
+    }
+    
+.noteText {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.noteTime {
+  font-size: 12px;
+  text-align: right;
+  margin-top: 5px;
+  color: #333;
+}
+
+.disappear {
+  animation: disintegrate 0.5s forwards;
+}
+
+@keyframes disintegrate {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(10deg);
+    filter: blur(2px);
+  }
+}
+
+.lineSpacing {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+  </style>
+</head>
+<body>
+  <h1>Notes</h1>
+  <div class="inputContainer">
+    <textarea id="noteInput" placeholder="Type your notes..." rows="1"></textarea>
+    <button id="saveButton">Save</button>
+  </div>  <div class="notesContainer" id="notesContainer"></div>  <div id="confirmPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border:2px solid black; padding:20px; z-index:100;">
+    <p id="confirmMessage"></p>
+ <button id="yesBtn" class="yes">Yes</button>
+ <button class="no"onclick= "confirmPopup.style.display='none'">No</button>
+  </div>  <script>
+    const noteInput = document.getElementById('noteInput');
+    const saveButton = document.getElementById('saveButton');
+    const notesContainer = document.getElementById('notesContainer');
+    const confirmPopup = document.getElementById('confirmPopup');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const yesBtn = document.getElementById('yesBtn');
+
+    let noteToDelete = null;
+    let noteToEdit = null;
+
+    const colorQueue = ['#ffeb3b', '#c8e6c9', '#ffe0b2', '#d1c4e9', '#b3e5fc'];
+    let colorIndex = 0;
+
+    const defaultSaveHandler = () => {
+      const noteText = noteInput.value.trim();
+      if (noteText !== '') {
+        const timeNow = formatDate(new Date());
+        createNoteBubble(noteText, timeNow, true);
+        noteInput.value = '';
+      }
+    };
+    saveButton.onclick = defaultSaveHandler;
+
+    noteInput.addEventListener('input', () => {
+      noteInput.style.height = 'auto';
+      noteInput.style.height = noteInput.scrollHeight + 'px';
+    });
+
+    function formatDate(date) {
+      const options = { day: '2-digit', month: 'short', year: '2-digit' };
+      const dateStr = date.toLocaleDateString('en-GB', options).replace(/\//g, '-');
+      let hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${dateStr} ${hours}:${minutes} ${ampm}`;
+    }
+
+    function createNoteBubble(text, time, saveToStorage) {
+      const noteDiv = document.createElement('div');
+      noteDiv.className = 'noteBubble';
+      noteDiv.innerHTML = `
+        <div class="noteText">${text.replace(/\n/g, '<br>')}</div>
+        <div class="noteTime">${time}</div>
+      `;
+      noteDiv.style.backgroundColor = colorQueue[colorIndex];
+      colorIndex = (colorIndex + 1) % colorQueue.length;
+
+      // Stagger left-right alignment
+      noteDiv.style.marginLeft = (Math.random() > 0.5 ? '10%' : '0');
+
+      noteDiv.addEventListener('touchstart', handleTouchStart, false);
+      noteDiv.addEventListener('touchend', handleTouchEnd, false);
+
+      notesContainer.appendChild(noteDiv);
+      if (saveToStorage) updateLocalStorage();
+    }
+
+    let xStart = null;
+    function handleTouchStart(e) {
+      xStart = e.changedTouches[0].clientX;
+    }
+
+    function handleTouchEnd(e) {
+      const xEnd = e.changedTouches[0].clientX;
+      const diff = xEnd - xStart;
+
+      if (diff < -50) {
+        noteToDelete = this;
+        confirmMessage.textContent = 'Delete this note?';
+        confirmPopup.style.display = 'block';
+      } else if (diff > 50) {
+        noteToEdit = this;
+        confirmMessage.textContent = 'Edit this note?';
+        confirmPopup.style.display = 'block';
+      }
+    }
+
+    yesBtn.addEventListener('click', () => {
+      if (noteToDelete) {
+        noteToDelete.classList.add('disappear');
+        setTimeout(() => {
+          notesContainer.removeChild(noteToDelete);
+          updateLocalStorage();
+          noteToDelete = null;
+        }, 500);
+      } else if (noteToEdit) {
+        const currentText = noteToEdit.querySelector('.noteText').innerHTML.replace(/<br\s*\/?>(\n)?/g, '\n');
+        noteInput.value = currentText;
+        noteInput.focus();
+
+        saveButton.onclick = () => {
+          const updatedText = noteInput.value.trim();
+          if (updatedText !== '') {
+            noteToEdit.querySelector('.noteText').innerHTML = updatedText.replace(/\n/g, '<br>');
+            noteInput.value = '';
+            noteToEdit = null;
+            updateLocalStorage();
+            saveButton.onclick = defaultSaveHandler;
+          }
+        };
+      }
+      confirmPopup.style.display = 'none';
+    });
+
+    function updateLocalStorage() {
+      const notes = [];
+      document.querySelectorAll('.noteBubble').forEach(note => {
+        notes.push({
+          text: note.querySelector('.noteText').innerHTML.replace(/<br\s*\/?>(\n)?/g, '\n'),
+          time: note.querySelector('.noteTime').textContent,
+          color: note.style.backgroundColor
+        });
+      });
+      localStorage.setItem('notes', JSON.stringify(notes));
+    }
+
+    function loadNotes() {
+      const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+      savedNotes.forEach(note => {
+        colorIndex = (colorQueue.indexOf(note.color) + 1) % colorQueue.length;
+        createNoteBubble(note.text, note.time, false);
+      });
+    }
+
+    loadNotes();
+  </script></body>
+</html>
