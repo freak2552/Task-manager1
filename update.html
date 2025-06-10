@@ -100,12 +100,12 @@
         <td class="percentage">30%</td>
       </tr>
        <tr>
-        <td>notes</td>
+        <td>ssc-notes</td>
         <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
         <td class="percentage">0%</td>
       </tr>
       <tr>
-        <td>sem-3</td>
+        <td>ssc-mcq</td>
         <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
         <td class="percentage">0%</td>
       </tr>
@@ -115,9 +115,9 @@
         <td class="percentage">0%</td>
       </tr>
       <tr>
-        <td>8pm-9pm</td>
+      <!-- <td>8pm-9pm</td>
         <td><input type="range" class="custom-slider" min="0" max="100" value="0" oninput="updateValue(this)"></td>
-        <td class="percentage">0%</td>
+        <td class="percentage">0%</td> -->
       </tr>    
     </tbody>
   </table>  <div class="button-container">
@@ -136,7 +136,7 @@ onclick="window.location.href='calendar.html'  ">calendar</button>
   
   
   <script>
-  const weights = [1, 1.5,1.5,2, 1.5, 1]; 
+  const weights = [1.5, 1.5,1.5,1, 2.5]; 
     function updateValue(slider) {
       const percentCell = slider.parentElement.nextElementSibling;
       percentCell.textContent = slider.value + '%';
